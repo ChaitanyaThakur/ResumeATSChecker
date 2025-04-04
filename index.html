@@ -45,9 +45,12 @@
             );
           }
 
-          // Wait for all pages to be processed and print the entire PDF text
+          // Wait for all pages to be processed, then display percentage score and text.
           Promise.all(textPromises).then(pages => {
-            resultDiv.innerHTML = pages.join('<br><br>');
+            // Count pages with non-empty text content
+            const parsedCount = pages.filter(text => text.trim().length > 0).length;
+            const percentage = Math.floor((parsedCount / totalPages) * 100);
+            resultDiv.innerHTML = `<div id="score"><p>Parsed: ${percentage}% of the PDF</p></div>` + pages.join('<br><br>');
           }).catch(error => {
             resultDiv.innerHTML = '<p>Error extracting text: ' + error.message + '</p>';
           });
