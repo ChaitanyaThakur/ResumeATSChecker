@@ -19,6 +19,9 @@ header {
     background-color: #c3d34f; /* added background color */
     border: 2px dashed #007ACC; /* added border color */
 }
+#score{
+    font-size: 5vh;
+}
 #result {
     margin: 20px auto;
     padding: 10px;
