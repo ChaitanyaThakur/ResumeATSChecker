@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Resume Readability Checker</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+</head>
+<body>
+  <header>
+       <h1>Resume Readability Checker / ATS Checker</h1>
+  </header>
+  <div id="uploadSection">
+    <input type="file" id="pdfUpload" accept="application/pdf" style="display:none" />
+    <label for="pdfUpload" class="button-54" role="button">Upload PDF</label>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    const pdfUpload = document.getElementById('pdfUpload');
+    const resultDiv = document.getElementById('result');
+
+    pdfUpload.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const fileReader = new FileReader();
+      fileReader.onload = function() {
+        const typedarray = new Uint8Array(this.result);
+
+        // Load the PDF using pdf.js
+        pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+          const totalPages = pdf.numPages;
+          let textPromises = [];
+
+          // Loop through each page and extract text
+          for (let i = 1; i <= totalPages; i++) {
+            textPromises.push(
+              pdf.getPage(i).then(page => {
+                return page.getTextContent().then(textContent => {
+                  const pageText = textContent.items.map(item => item.str).join(' ');
+                  return pageText;
+                });
+              })
+            );
+          }
+
+          // Wait for all pages to be processed and print the entire PDF text
+          Promise.all(textPromises).then(pages => {
+            resultDiv.innerHTML = pages.join('<br><br>');
+          }).catch(error => {
+            resultDiv.innerHTML = '<p>Error extracting text: ' + error.message + '</p>';
+          });
+        }).catch(error => {
+          resultDiv.innerHTML = '<p>Error loading PDF: ' + error.message + '</p>';
+        });
+      };
+
+      fileReader.readAsArrayBuffer(file);
+    });
+  </script>
+</body>
+</html>
